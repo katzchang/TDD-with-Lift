@@ -22,13 +22,16 @@ object ValidatorsTestSpecs extends Specification {
   class  SomeMapper extends LongKeyedMapper[SomeMapper] with IdPK {
     def getSingleton = SomeMapper
 
-    object notNullField extends MappedDate(this) {
+    trait NotNull {
+      selftype: MappedDate[_] =>
       def notNull(s: AnyRef): List[FieldError] = 
 	if (s == null) List(FieldError(this, "should be not null"))
 	else List[FieldError]()
 
       override def validations = notNull _ :: Nil
     }
+
+    object notNullField extends MappedDate(this) with NotNull
   }
   object SomeMapper extends SomeMapper with LongKeyedMetaMapper[SomeMapper]
 
