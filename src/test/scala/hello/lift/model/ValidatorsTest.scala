@@ -22,31 +22,26 @@ object ValidatorsTestSpecs extends Specification {
   class  SomeMapper extends LongKeyedMapper[SomeMapper] with IdPK {
     def getSingleton = SomeMapper
 
-    def alwaysError(field: FieldIdentifier)(s: String) = 
-      List(FieldError(field, "always error..."))
-
     def noNull(field: FieldIdentifier)(s: String): List[FieldError] = 
       if (s == null) List(FieldError(field, "should be not null"))
       else List[FieldError]()
 
-    object validField extends MappedString(this, 60)
-    object someField extends MappedString(this, 60) {
+    object notNullField extends MappedString(this, 60) {
       override def validations = noNull(this) _ :: Nil
     }
   }
   object SomeMapper extends SomeMapper with LongKeyedMetaMapper[SomeMapper]
 
-  "Validationのキャラクタライズ" should {
+  "NotNull validator" should {
     val target = SomeMapper.create
     
-    "Validationがない場合、validate結果はNil" in {
-      target.validField.validate must equalTo(Nil)
+    "値が設定されている場合、validate結果はNil" in {
+      target.notNullField("hogehoge")
+      target.validate must equalTo(Nil)
     }
     "Validationにかかる場合、validate結果はNilではない" in {
-      target.someField.setFromAny(null)
-      target.someField.validate.size must equalTo(1)
-      target.someField("hoge")
-      target.someField.validate must equalTo(Nil)
+      target.notNullField.setFromAny(null)
+      target.validate.size must equalTo(1)
     }
   }
 }
