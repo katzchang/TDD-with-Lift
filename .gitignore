@@ -3,5 +3,6 @@ target
 project/boot
 project/build/target
 *~
-~#*#
+*#*#
 *.db
+.ensime
