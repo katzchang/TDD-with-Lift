@@ -22,12 +22,12 @@ object ValidatorsTestSpecs extends Specification {
   class  SomeMapper extends LongKeyedMapper[SomeMapper] with IdPK {
     def getSingleton = SomeMapper
 
-    def noNull(field: FieldIdentifier)(s: String): List[FieldError] = 
-      if (s == null) List(FieldError(field, "should be not null"))
-      else List[FieldError]()
+    object notNullField extends MappedDate(this) {
+      def notNull(s: AnyRef): List[FieldError] = 
+	if (s == null) List(FieldError(this, "should be not null"))
+	else List[FieldError]()
 
-    object notNullField extends MappedString(this, 60) {
-      override def validations = noNull(this) _ :: Nil
+      override def validations = notNull _ :: Nil
     }
   }
   object SomeMapper extends SomeMapper with LongKeyedMetaMapper[SomeMapper]
@@ -36,7 +36,7 @@ object ValidatorsTestSpecs extends Specification {
     val target = SomeMapper.create
     
     "値が設定されている場合、validate結果はNil" in {
-      target.notNullField("hogehoge")
+      target.notNullField(new java.util.Date)
       target.validate must equalTo(Nil)
     }
     "Validationにかかる場合、validate結果はNilではない" in {
