@@ -25,19 +25,20 @@ object ValidatorsTestSpecs extends Specification {
     def alwaysError(field: FieldIdentifier)(s: String) = 
       List(FieldError(field, "always error..."))
 
+    def noNull(field: FieldIdentifier)(s: String): List[FieldError] = 
+      if (s == null) List(FieldError(field, "should be not null"))
+      else List[FieldError]()
+
     object validField extends MappedString(this, 60)
     object someField extends MappedString(this, 60) {
-      def noNull(s: String): List[FieldError] = 
-	if (s == null) List(FieldError(this, "should be not null"))
-	else List[FieldError]()
-
-      override def validations = noNull _ :: Nil
+      override def validations = noNull(this) _ :: Nil
     }
   }
   object SomeMapper extends SomeMapper with LongKeyedMetaMapper[SomeMapper]
 
   "Validationのキャラクタライズ" should {
     val target = SomeMapper.create
+    
     "Validationがない場合、validate結果はNil" in {
       target.validField.validate must equalTo(Nil)
     }
