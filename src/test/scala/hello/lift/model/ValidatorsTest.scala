@@ -21,23 +21,31 @@ object ValidatorsTestSpecsRunner extends ConsoleRunner(ValidatorsTestSpecs)
 object ValidatorsTestSpecs extends Specification {
   class  SomeMapper extends LongKeyedMapper[SomeMapper] with IdPK {
     def getSingleton = SomeMapper
+
     def alwaysError(field: FieldIdentifier)(s: String) = 
       List(FieldError(field, "always error..."))
-    
+
     object validField extends MappedString(this, 60)
     object someField extends MappedString(this, 60) {
-      override def validations = alwaysError(someField) _ :: Nil
+      def noNull(s: String): List[FieldError] = 
+	if (s == null) List(FieldError(this, "should be not null"))
+	else List[FieldError]()
+
+      override def validations = noNull _ :: Nil
     }
   }
   object SomeMapper extends SomeMapper with LongKeyedMetaMapper[SomeMapper]
+
   "Validationのキャラクタライズ" should {
+    val target = SomeMapper.create
     "Validationがない場合、validate結果はNil" in {
-      val target = SomeMapper.create
       target.validField.validate must equalTo(Nil)
     }
     "Validationにかかる場合、validate結果はNilではない" in {
-      val target = SomeMapper.create
+      target.someField.setFromAny(null)
       target.someField.validate.size must equalTo(1)
+      target.someField("hoge")
+      target.someField.validate must equalTo(Nil)
     }
   }
 }
