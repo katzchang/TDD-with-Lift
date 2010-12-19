@@ -32,14 +32,15 @@ class Boot {
 
     // where to search snippet
     LiftRules.addToPackages("hello.lift")
-    Schemifier.schemify(true, Schemifier.infoF _, User)
+    Schemifier.schemify(true, Schemifier.infoF _, User, Busho)
 
     // Build SiteMap
     def sitemap() = SiteMap(
-      Menu("Home") / "index" >> User.AddUserMenusAfter, // Simple menu form
-      // Menu with special Link
+      (Menu("Home") / "index" >> User.AddUserMenusAfter)::
       Menu(Loc("Static", Link(List("static"), true, "/static/index"), 
-	       "Static Content")))
+	       "Static Content")) ::
+      Busho.menus: _*
+      )
 
     LiftRules.setSiteMapFunc(() => User.sitemapMutator(sitemap()))
 
