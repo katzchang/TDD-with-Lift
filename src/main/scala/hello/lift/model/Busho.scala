@@ -10,4 +10,5 @@ class Busho extends LongKeyedMapper[Busho] with IdPK {
 
   object name extends MappedString(this, 60)
   object hoge extends MappedString(this, 10) with ValidateLength
+  object startedAt extends MappedDate(this) with Validators.NotNull
 }
